@@ -1,0 +1,104 @@
+WEBSITE FOR JENKINS
+________________________________
+
+While launching instance write script
+
+#!/bin/bash
+sudo apt install apache2 wget unzip -y
+________________________________________________
+
+After launch instace run this commands:
+
+sudo apt update -y
+sudo apt install openjdk-21-jdk -y
+FOR JENKINS INTALL COMMANDS:
+sudo wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+
+echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+sudo apt-get update
+
+sudo apt-get install jenkins
+
+sudo systemctl status jenkins
+
+public:8080
+
+NOTE:while creating Jenkins you can selesct pool SCM if you want
+
+____________________________-
+sudo visudo
+__________________________________
+
+jenkins ALL=(ALL) NOPASSWD: /usr/bin/apt-get, /usr/bin/systemctl, /bin/cp, /usr/bin/unzip, /bin/wget
+
+PIPELINE SCRIPT
+
+_________________________
+
+pipeline {
+    agent any
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git url: 'https://github.com/Faisalkhan45/faisal45.git', branch: 'master'
+            }
+        }
+        stage('List Files') {
+            steps {
+                sh 'ls -l'
+            }
+        }
+        stage('Install dos2unix') {
+            steps {
+                sh 'sudo apt-get update'
+                sh 'sudo apt-get install -y dos2unix'
+            }
+        }
+        stage('Convert Script Line Endings') {
+            steps {
+                sh 'dos2unix UBUNTU_WEBSITE.sh'
+            }
+        }
+        stage('Prepare Script') {
+            steps {
+                sh 'chmod +x UBUNTU_WEBSITE.sh'
+            }
+        }
+        stage('Run Script') {
+            steps {
+                // Adjusting the directory if needed
+                // If 'UBUNTU_WEBSITE.sh' is at the root level, you may not need to use 'dir'.
+                sh './UBUNTU_WEBSITE.sh'
+            }
+        }
+    }
+}
+
+________________________
+
+CREAETE A FILE UBUNTU_WEBSITE.sh and upload in GitHub because according to that pipeline script is return
+________________________________
+
+#!/bin/bash
+set -x  # Enable debugging
+
+# Update and install required packages
+sudo apt update
+sudo apt install -y unzip apache2 wget
+
+# Start and enable Apache
+sudo systemctl start apache2
+sudo systemctl enable apache2
+
+# Download the zip file
+wget https://www.free-css.com/assets/files/free-css-templates/download/page296/neogym.zip
+
+# Unzip the downloaded file
+unzip -o neogym.zip
+
+# Copy files to the web directory
+sudo cp -r neogym-html/* /var/www/html
+
+# Restart Apache
+sudo systemctl restart apache2
